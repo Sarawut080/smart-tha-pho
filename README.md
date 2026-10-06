@@ -50,3 +50,5 @@ API v1: `http://localhost:4100/api/v1/health`
 ## ตรวจคุณภาพและส่งมอบ
 
 รัน `npm test` และ `npm run build` ก่อนส่งงาน ดู [เวอร์ชันและผลตรวจ](docs/handover/GIT_STATUS.md) และ [คู่มือรายระบบ](docs/handover/README.md#คู่มือรายระบบ) สำหรับข้อจำกัดและงานที่ยังต้องพัฒนา ข้อมูลประชาชน `.env` คีย์ และ uploads ต้องส่งผ่านช่องทางจำกัดสิทธิ์ ไม่ส่งขึ้น Git
+#   s m a r t - t h a - p h o  
+ 
