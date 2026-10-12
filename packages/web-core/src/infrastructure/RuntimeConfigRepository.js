@@ -1,6 +1,16 @@
+// อ่าน config ของ repo ที่ deploy หน้าเว็บนี้เอง ไม่ผูกกับ owner ใด owner หนึ่ง
+const githubRawConfigUrl = () => {
+  const hostname = String(location.hostname || "").toLowerCase();
+  if (!hostname.endsWith(".github.io")) return null;
+  const owner = hostname.slice(0, -".github.io".length);
+  const repository = String(import.meta.env.BASE_URL || "").split("/").filter(Boolean)[0];
+  if (!owner || !repository) return null;
+  return `https://raw.githubusercontent.com/${owner}/${repository}/main/runtime-config.json?t=${Date.now()}`;
+};
+
 const DEFAULT_CONFIG_SOURCES = Object.freeze([
-  () => `https://raw.githubusercontent.com/0tyght/smart-tha-pho/main/runtime-config.json?t=${Date.now()}`,
-  () => new URL("runtime-config.json", `${location.origin}${import.meta.env.BASE_URL}`).href,
+  () => new URL(`runtime-config.json?t=${Date.now()}`, `${location.origin}${import.meta.env.BASE_URL}`).href,
+  githubRawConfigUrl,
 ]);
 
 const DEFAULT_BUILD_TIME_API_BASE = import.meta.env?.VITE_API_BASE_URL || "";
@@ -47,7 +57,9 @@ export class RuntimeConfigRepository {
 
     for (const source of this.sources) {
       try {
-        const response = await this.fetchImplementation(source(), { cache: "no-store" });
+        const url = source();
+        if (!url) continue;
+        const response = await this.fetchImplementation(url, { cache: "no-store" });
         if (!response.ok) continue;
         const config = await response.json();
         const apiBase = this.normalizeApiBase(config.portalApiBaseUrl || config.apiBaseUrl);

@@ -37,6 +37,22 @@ test("RuntimeConfigRepository prefers fresh runtime config over a stale bundled 
   assert.equal(await repository.getApiBase(), "https://fallback.example.com/api");
 });
 
+test("RuntimeConfigRepository skips sources that do not apply to the current host", async () => {
+  const requested = [];
+  const repository = new RuntimeConfigRepository({
+    buildTimeApiBase: "https://stale.example.com/api",
+    locationObject: publicLocation,
+    sources: [() => null, () => "https://example.com/runtime-config.json"],
+    fetchImplementation: async (url) => {
+      requested.push(url);
+      return { ok: true, async json() { return { apiBaseUrl: "https://fresh.example.com/api" }; } };
+    },
+  });
+
+  assert.equal(await repository.getApiBase(), "https://fresh.example.com/api");
+  assert.deepEqual(requested, ["https://example.com/runtime-config.json"]);
+});
+
 test("RuntimeConfigRepository uses the local portal API without changing the public webhook API", async () => {
   const repository = new RuntimeConfigRepository({
     buildTimeApiBase: "",
